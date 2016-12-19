@@ -1,0 +1,47 @@
+import __builtin__
+print dir(__builtin__)
+import pprint, json
+import requests
+import googlemaps
+from collections import OrderedDict
+from datetime import datetime
+import math
+
+def main():
+	gmaps = googlemaps.Client(key='Your API key')
+	r = requests.get ("http://www.divvybikes.com/stations/json")
+	stations = []
+	address = input ("Please enter an address:  ")
+	geocode_result = gmaps.geocode(address + "Chicago")
+	
+	coord1=  geocode_result[0]['geometry']['location']['lat']
+	coord2 = geocode_result[0]['geometry']['location']['lng']
+	coord1 = float (coord1)
+	coord2 = float (coord2)
+	for i in r.json()['stationBeanList']:
+		stations.append (i['stationName'])
+	bikes = []
+	for i in r.json()['stationBeanList']:
+		bikes.append (i['availableBikes'])
+	stations_bikes = list (zip(stations, bikes))
+
+	latitude = []
+	for i in r.json()['stationBeanList']:
+		latitude.append (i['latitude'])
+	longitude = []
+	for i in r.json()['stationBeanList']:
+		longitude.append (i['longitude'])
+	coordinates = list(zip(latitude, longitude))
+	diff = []
+	for i in range (0, len (coordinates)):
+		distance = math.sqrt (math.fabs ((coordinates[int(i)][0] - coord1))**2 + math.fabs((coordinates[int(i)][1] - coord2))**2)
+		diff.append (distance)
+	final = {}
+	final = dict (zip (stations_bikes,diff))
+	final1 = OrderedDict(sorted (final.items(), key=lambda x: x[1]))
+	Final = list (final1.items())      
+	print ("The closest Divvy station is: ",  Final[0][0][0])
+	print ("It currently has: ", Final[0][0][1], "available bikes")       
+ 
+if __name__ == "__main__":
+    main()
