@@ -1,1 +1,1 @@
-# b_loc
+# comparing summed data from feeds, beginning with b-cycle cities
